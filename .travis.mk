@@ -11,7 +11,6 @@
 JOBS ?= 2
 TAIL ?= tail -n 15
 
-
 EXAMPLES_ALL = hello-world
 
 EXAMPLES_native = ipv6/native-border-router
@@ -28,6 +27,8 @@ EXAMPLES_most_non_native = \
 EXAMPLES_redbee_econotag = $(EXAMPLES_most_non_native)
 
 EXAMPLES_sky = $(EXAMPLES_most_non_native) sky-shell
+
+COOJA_TESTS  = tools/cooja/contiki_tests/*.csc
 
 CT := \033[0;0m
 
@@ -49,6 +50,12 @@ PASS  = (echo "\033[1;32m  $(PASS_SIGN) ➝ ❨ $$e ∈ $@ ❩$(CT)"; echo pass 
 ifeq ($(BUILD_TYPE),multi)
 THIS = $(MAKE) -C examples/$$e TARGET=$@ > $(LOG) 2>&1
 MINE = $(EXAMPLES_ALL) $(EXAMPLES_$(subst -,_,$@))
+endif
+
+ifeq ($(BUILD_TYPE),cooja)
+JAVA = java -mx512m
+THIS = $(SHELL) -c 'cd $(dir $$e) && $(JAVA) -jar ../dist/cooja.jar -nogui=$(basename $$e) > $(LOG) 2>&1'
+MINE = $(COOJA_TESTS)
 endif
 
 LOG  = /tmp/$@_`echo $$e | sed 's:/:_:g'`.log
